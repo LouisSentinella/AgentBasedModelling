@@ -15,7 +15,9 @@ def agent_portrayal(agent):
         portrayal["h"] = 1
         portrayal["Layer"] = 1
     elif agent.type == "Race":
-        portrayal["Color"] = "Black" if agent.colour == 1 else "Blue"
+        colour_dict = {0: "Black", 1:"Blue", 2:"Red", 3:"Green"}
+        portrayal["Color"] = colour_dict[agent.colour]
+
     elif agent.type == "Simple":
         portrayal["Color"] = agent.colour
 
@@ -24,8 +26,8 @@ def agent_portrayal(agent):
 
 if __name__ == "__main__":
     chart_score = ChartModule([{"Label": "Correct", "Color": "Black"}], data_collector_name='datacollector')
-    grid = CanvasGrid(agent_portrayal, 50, 50, 750, 750)
-    server = ModularServer(RaceClassificationModel, [grid, chart_score], "Game Model",
-                           {"n": 200, "width": 50, "height": 50, "mutation_rate": 0.005, "max_age": 100})
+    grid = CanvasGrid(agent_portrayal, 35, 35, 700, 700)
+    server = ModularServer(FourRaceClassificationModel, [grid, chart_score], "Game Model",
+                           {"n": 100, "width": 35, "height": 35, "mutation_rate": 0.1, "max_age": 200, "save_path": "saved_models/four_race/race_evolution_"})
     server.port = 8521
     server.launch()

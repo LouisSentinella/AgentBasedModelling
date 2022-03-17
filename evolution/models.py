@@ -7,17 +7,21 @@ from mesa.time import RandomActivation
 import numpy as np
 import copy
 from agents import *
+import tracemalloc
 
 
 class EvolutionModel(Model):
     """A model with some number of agents."""
 
     def __init__(self, n, width, height, max_age, mutation_rate, save_path="saved_models/uncategorized/model_"):
+        self.snap = None
         self.num_agents = n
+        tracemalloc.start()
         self.n = n
         self.grid = MultiGrid(width, height, False)
         self.schedule = RandomActivation(self)
         self.running = True
+        self.snap = None
         self.mutation_rate = mutation_rate
         self.age = 0
         self.save_iterator = 10
@@ -40,10 +44,12 @@ class EvolutionModel(Model):
     def step(self):
         self.steps += 1
         self.age += 1
+        self.snap = None
         if (self.steps // self.max_age) % self.save_iterator == 0:
             with open(self.save_file_path + str(self.steps // self.max_age) + ".pkl", "wb") as f:
                 pickle.dump(self, f)
         if self.age == self.max_age:
+            self.snap = tracemalloc.take_snapshot()
             self.weights = []
             self.correct = correct_amount(self)
             self.datacollector.collect(self)
@@ -100,14 +106,14 @@ class EvolutionModel(Model):
             # Iterate through pairs
             for pair in pairs:
                 # Add to weights
-                for i in range(self.n // int(self.correct)):
+                for i in range(self.n // int(len(pairs))):
                     if self.num_agents % self.n != 0 or self.num_agents == 0:
                         new_weights = []
-                        for i in range(len(pair[0].weights)):
+                        for j in range(len(pair[0].weights)):
                             new_weights.append(
-                                torch.Tensor(np.array([pair[random.randint(0, 1)].weights[i].cpu().flatten()[x] for x in
-                                                       range(len(pair[0].weights[i].flatten()))]).reshape(
-                                    pair[0].weights[i].shape)))
+                                torch.Tensor(np.array([pair[random.randint(0, 1)].weights[j].cpu().flatten()[x] for x in
+                                                       range(len(pair[0].weights[j].flatten()))]).reshape(
+                                    pair[0].weights[j].shape)))
                         self.num_agents += 1
                         if self.random.random() < self.mutation_rate:
                             section_to_mutate = new_weights[np.random.choice(range(len(new_weights)), 1,
@@ -115,7 +121,8 @@ class EvolutionModel(Model):
                                                                                 0.2 / (len(new_weights) / 2)] * int(
                                                                                  (len(new_weights) / 2)))[0]]
                             # print(section_to_mutate.shape)
-                            if section_to_mutate.shape == new_weights[1].shape:
+                            bias_shapes = [new_weights[x].shape for x in range(1, len(new_weights), 2)]
+                            if section_to_mutate.shape in bias_shapes:
                                 randomRow = np.random.randint(section_to_mutate.shape[0], size=1)
                                 section_to_mutate[randomRow] = np.random.randn()
                             else:
@@ -226,7 +233,7 @@ class SimplestClassificationModel(EvolutionModel):
 
 
 class RaceClassificationModel(EvolutionModel):
-    def __init__(self, n, width, height, max_age, mutation_rate, save_path="saved_models/multi/race_evolution_"):
+    def __init__(self, n, width, height, max_age, mutation_rate, save_path="saved_models/uncategorized/model_"):
         self.net = torch.nn.Sequential(
             torch.nn.Linear(8, 6)
         )
@@ -245,6 +252,36 @@ class RaceClassificationModel(EvolutionModel):
         super().sexual_reproduction()
         for agent in self.schedule.agents:
             agent.colour = random.randint(0, 1)
+
+
+class FourRaceClassificationModel(EvolutionModel):
+    def __init__(self, n, width, height, max_age, mutation_rate, save_path="saved_models/uncategorized/model_"):
+        self.net = torch.nn.Sequential(
+            torch.nn.Linear(8, 10),
+            torch.nn.ReLU(),
+            torch.nn.Linear(10,6)
+        )
+        self.agent = FourRaceNeuralAgent
+        super().__init__(n, width, height, max_age, mutation_rate, save_path)
+
+    def is_correct(self, agent):
+        if agent.pos[1] < self.grid.height // 4:
+            if agent.pos[0] < self.grid.width // 2:
+                return 0 == agent.colour
+            else:
+                return 1 == agent.colour
+        elif agent.pos[1] > self.grid.height // 4:
+            if agent.pos[0] < self.grid.width // 2:
+                return 2 == agent.colour
+            else:
+                return 3 == agent.colour
+        else:
+            return False
+
+    def sexual_reproduction(self):
+        super().sexual_reproduction()
+        for agent in self.schedule.agents:
+            agent.colour = random.randint(0, 3)
 
 
 class SimpleDownModel(EvolutionModel):

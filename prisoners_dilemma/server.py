@@ -52,5 +52,5 @@ chart_pop = ChartModule(
 grid = CanvasGrid(agent_portrayal, 50, 50, 500, 500)
 server = ModularServer(GameModel, [grid, chart, chart_score, chart_pop, chart_age], "Game Model",
                        {"N": 600, "width": 50, "height": 50, "harshness": 0.7})
-server.port = 8521
+server.port = 8522
 server.launch()

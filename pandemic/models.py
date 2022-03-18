@@ -18,7 +18,7 @@ class PandemicModel(Model):
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
         self.datacollector = DataCollector(
-            model_reporters={"Dead": self.get_dead_amount, "Infected": self.get_infected_amount, "Uninfected": self.get_uninfected_amount, "Alive": self.get_alive_amount},
+            model_reporters={"Dead": self.get_dead_amount, "Infected": self.get_infected_amount,"Total_Cases": self.get_total_cases},
         )
         self.asymptomatic_probability = asymptomatic_probability
         self.masked_percentage = masked_percentage
@@ -28,6 +28,7 @@ class PandemicModel(Model):
         self.quarantine_length = quarantine_length
         self.immunity_length = immunity_length
         self.age = 0
+        self.total_cases = 0
         self.time = 0
         self.lockdown_threshold = lockdown_threshold
         self.liftlockdown_threshold = liftlockdown_threshold
@@ -135,3 +136,6 @@ class PandemicModel(Model):
 
     def get_alive_amount(self):
         return len(self.schedule.agents)
+
+    def get_total_cases(self):
+        return self.total_cases

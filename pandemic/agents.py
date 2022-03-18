@@ -87,6 +87,7 @@ class Person(Agent):
     def infect(self):
         self.infected = True
         self.time_infected = 0
+        self.model.total_cases += 1
         self.type = "Infected"
         self.asymptomatic = self.model.random.random() < self.model.asymptomatic_probability
         self.death_attempt_day = self.model.random.randint(0, self.model.infection_length - 1)

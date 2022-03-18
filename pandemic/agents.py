@@ -42,12 +42,14 @@ class Person(Agent):
         """
         if self.infected:
             self.time_infected += 1
-            if not self.quarantined and self.time_infected == self.model.time_till_symptoms * 24 and not self.asymptomatic and self.random.random() < 0.5:
-                self.quarantine_toggle()
             if self.time_infected == self.model.infection_length * 24:
                 self.infected = False
                 self.immune = True
                 self.time_recovered = 0
+                self.time_infected = 0
+            if not self.quarantined and self.time_infected >= self.model.time_till_symptoms * 24 and not self.asymptomatic and self.random.random() < 0.5:
+                self.quarantine_toggle()
+
 
             if len(self.model.grid.grid[self.pos[0]][self.pos[1]]) > 1:
                 for agent in self.model.grid.grid[self.pos[0]][self.pos[1]]:

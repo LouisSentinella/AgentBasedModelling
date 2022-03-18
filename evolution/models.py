@@ -16,12 +16,12 @@ class EvolutionModel(Model):
     def __init__(self, n, width, height, max_age, mutation_rate, save_path="saved_models/uncategorized/model_"):
         self.snap = None
         self.num_agents = n
-        tracemalloc.start()
+        #tracemalloc.start()
         self.n = n
         self.grid = SingleGrid(width, height, False)
         self.schedule = RandomActivation(self)
         self.running = True
-        self.snap = None
+        #self.snap = None
         self.mutation_rate = mutation_rate
         self.age = 0
         self.save_iterator = 10
@@ -49,7 +49,7 @@ class EvolutionModel(Model):
             with open(self.save_file_path + str(self.steps // self.max_age) + ".pkl", "wb") as f:
                 pickle.dump(self, f)
         if self.age == self.max_age:
-            self.snap = tracemalloc.take_snapshot()
+            #self.snap = tracemalloc.take_snapshot()
             self.weights = []
             self.correct = correct_amount(self)
             self.datacollector.collect(self)

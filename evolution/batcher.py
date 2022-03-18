@@ -4,7 +4,7 @@ from tqdm import tqdm
 import tracemalloc
 load = False
 if __name__ == "__main__":
-    model = FourRaceClassificationModel(n=100, width=35, height=35, mutation_rate=0.1, max_age=200, save_path="saved_models/four_race_deep/race_evolution_")
+    model = FourRaceClassificationModel(n=100, width=35, height=35, mutation_rate=0.1, max_age=200)
     model.save_iterator = 100
     graph_iterator = 50
     num_gens = 10_000

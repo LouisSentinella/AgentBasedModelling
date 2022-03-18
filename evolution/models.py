@@ -18,7 +18,7 @@ class EvolutionModel(Model):
         self.num_agents = n
         tracemalloc.start()
         self.n = n
-        self.grid = MultiGrid(width, height, False)
+        self.grid = SingleGrid(width, height, False)
         self.schedule = RandomActivation(self)
         self.running = True
         self.snap = None
